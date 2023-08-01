@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kabaddi Raid Timer</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Fonts - LCD -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=LCD&display=swap">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: black;
+            overflow: hidden;
+            /* Prevent scroll bars in fullscreen */
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        #timerDisplay {
+            font-family: 'LCD', monospace;
+            /* Use the LCD font */
+            font-size: 30vw;
+            /* Increase the font size */
+            margin-bottom: 0px;
+            color: red;
+            /* Set text color to red */
+            user-select: none;
+            /* Make the text non-selectable */
+            -webkit-user-select: none;
+            /* For Safari */
+            -moz-user-select: none;
+            /* For Firefox */
+        }
+
+        .btn {
+            font-size: 40px;
+            /* Adjust the font size for buttons */
+            padding: 5px 30px;
+            /* Adjust button padding */
+            margin: 10px;
+            opacity: 1;
+            /* Show the button by default */
+            transition: opacity 0.3s ease-in-out;
+            /* Add transition for opacity */
+        }
+
+        .btn-hidden {
+            display: none;
+            /* Hide the button with display none */
+        }
+
+        .settings-icon {
+            position: absolute;
+            top: 20px;
+            right: 130px;
+            font-size: 40px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .help-icon {
+            position: absolute;
+            top: 20px;
+            right: 70px;
+            font-size: 40px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .fullscreen-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 40px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .help-dialog {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 80px;
+            right: 70px;
+            z-index: 999;
+            display: none;
+        }
+
+        .help-dialog.active {
+            display: block;
+        }
+
+        /* Media queries for responsive font size */
+        @media (max-width: 768px) {
+            #timerDisplay {
+                font-size: 30vw;
+            }
+
+            .btn {
+                font-size: 25px;
+                padding: 10px 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #timerDisplay {
+                font-size: 40vw;
+            }
+
+            .btn {
+                font-size: 20px;
+                padding: 8px 16px;
+            }
+
+            .settings-icon {
+                right: 100px;
+            }
+
+            .help-icon {
+                right: 40px;
+            }
+        }
+
+        /* Positioning of top buttons on mobile */
+        @media (max-width: 576px) {
+            .settings-icon {
+                right: 100px;
+                top: 40px;
+            }
+
+            .help-icon {
+                right: 40px;
+                top: 40px;
+            }
+
+            .fullscreen-icon {
+                right: 160px;
+                top: 40px;
+            }
+        }
+
+        /* Landscape mode adjustments for smaller screens */
+        @media (max-height: 450px) or (max-width: 576px) {
+            #timerDisplay {
+                font-size: 200px;
+            }
+
+            .btn {
+                font-size: 25px;
+                padding: 10px 20px;
+                margin: 5px;
+                /* Add margin between buttons */
+            }
+
+            .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                /* Center elements horizontally */
+                justify-content: space-around;
+                /* Evenly space the elements vertically */
+                height: 100vh;
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .text-center {
+                margin-top: 10px;
+                /* Adjust the top margin for better spacing */
+            }
+
+            .settings-icon,
+            .help-icon,
+            .fullscreen-icon {
+                font-size: 30px;
+                margin-top: 20px;
+                margin-right: 5px;
+                cursor: pointer;
+            }
+
+            /* Adjust spacing dynamically based on available height */
+            @media (max-height: 450px) {
+                #timerDisplay {
+                    margin-bottom: 0px;
+                }
+
+                .text-center {
+                    margin-top: 0px;
+                }
+            }
+        }
+
+        /* Make the text even smaller for smaller screens */
+        @media (max-height: 350px) {
+            /* #timerDisplay {
+                font-size: 100px;
+            } */
+
+            .btn {
+                font-size: 20px;
+                padding: 8px 16px;
+            }
+        }
+
+        /* In landscape, make the text even smaller for smaller screens */
+        @media (max-height: 350px) and (orientation: landscape) {
+            #timerDisplay {
+                font-size: 15vw;
+            }
+
+            .btn {
+                font-size: 15px;
+                padding: 5px 10px;
+            }
+        }
+    </style>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Bootstrap and jQuery JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="text-center">
+                    <div id="timerDisplay">30</div>
+                    <button id="timerButton" class="btn btn-primary" onclick="toggleTimer()">Start</button>
+                    <button class="btn btn-danger btn-hidden" onclick="stopTimer()">Pause</button>
+                    <button class="btn btn-danger" onclick="resetTimer()">Reset</button>
+                </div>
+            </div>
+        </div>
+        <!-- Settings Icon -->
+        <i class="fas fa-cog settings-icon" data-toggle="modal" data-target="#settingsModal"></i>
+        <!-- Help Icon -->
+        <i class="fas fa-question-circle help-icon" onclick="toggleHelpDialog()"></i>
+        <!-- Fullscreen Icon -->
+        <i class="fas fa-expand-arrows-alt fullscreen-icon" onclick="toggleFullScreen()"></i>
+        <!-- Help Dialog -->
+        <div class="help-dialog" id="helpDialog">
+            <h5>Keyboard Shortcuts:</h5>
+            <ul>
+                <li><strong>Spacebar:</strong> Start/Stop Timer</li>
+                <li><strong>R:</strong> Reset Timer</li>
+            </ul>
+        </div>
+        <!-- Audio Permission Button -->
+        <div id="audioPermission">
+            <button onclick="enableAudio()" style="display: block; margin: 10px auto;">Click to Enable Audio</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">Settings</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="timerDuration">Timer Duration (seconds)</label>
+                        <input type="number" class="form-control" id="timerDuration" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="beepingSeconds">Beeping Time (seconds)</label>
+                        <input type="number" class="form-control" id="beepingSeconds" value="5">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="applySettings()">Apply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="beepSound">
+        <source src="beep1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+    <audio id="finishingBeepSound">
+        <source src="beep2.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        let timer;
+        let time = 30; // Default countdown time in seconds
+        let beepingSeconds = 5; // Default beeping seconds
+        let isPaused = false;
+        let audioEnabled = false;
+
+        function updateTimerDisplay() {
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.innerText = time.toString().padStart(2, '0');
+        }
+
+        function beep() {
+            const beepSound = document.getElementById('beepSound');
+            beepSound.play();
+        }
+
+        function finishingBeep() {
+            const finishingBeepSound = document.getElementById('finishingBeepSound');
+            finishingBeepSound.play();
+        }
+
+        // Function to enable audio on user interaction
+        function enableAudio() {
+            if (audioEnabled === false) {
+                audioEnabled = true;
+                const audioPermission = document.getElementById('audioPermission');
+                audioPermission.style.display = 'none';
+                beep(); // Test beep immediately after audio permission is granted
+            }
+        }
+
+        // Check if audio is allowed on user interaction (iOS devices)
+        document.addEventListener('click', function () {
+            if (audioEnabled === false && isIOS()) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(function () {
+                        audioEnabled = true;
+                        const audioPermission = document.getElementById('audioPermission');
+                        audioPermission.style.display = 'none';
+                        beep(); // Test beep immediately after audio permission is granted
+                    });
+                }
+            }
+        });
+
+        // Helper function to check if the user is using an iOS device
+        function isIOS() {
+            return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        }
+
+        function startTimer() {
+            if (!timer || time === 0) {
+                clearInterval(timer);
+                timer = setInterval(() => {
+                    if (time > 0 && !isPaused) {
+                        time--;
+                        if (time <= beepingSeconds) {
+                            if (time === 0) {
+                                finishingBeep();
+                                timerButton.textContent = 'Start';
+                            } else {
+                                beep();
+                            }
+                        }
+                        updateTimerDisplay();
+                    } else {
+                        stopTimer();
+                    }
+                }, 1000);
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+            timer = null;
+            isPaused = true;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            time = 30;
+            updateTimerDisplay();
+            isPaused = false;
+        }
+
+        function applySettings() {
+            const timerDurationInput = document.getElementById('timerDuration');
+            const beepingSecondsInput = document.getElementById('beepingSeconds');
+            const newTime = parseInt(timerDurationInput.value);
+            const newBeepingSeconds = parseInt(beepingSecondsInput.value);
+
+            if (!isNaN(newTime) && newTime >= 0) {
+                time = newTime;
+            }
+
+            if (!isNaN(newBeepingSeconds) && newBeepingSeconds >= 0) {
+                beepingSeconds = newBeepingSeconds;
+            }
+
+            updateTimerDisplay();
+            $('#settingsModal').modal('hide');
+        }
+
+        function toggleTimer() {
+            const timerButton = document.getElementById('timerButton');
+            if (!timer || time === 0) {
+                // Timer is not running or has finished, start a fresh timer
+                timerButton.textContent = 'Pause';
+                isPaused = false;
+                startTimer();
+            } else {
+                // Timer is running, pause it
+                timerButton.textContent = 'Resume';
+                isPaused = true;
+            }
+        }
+
+        function toggleHelpDialog() {
+            const helpDialog = document.getElementById('helpDialog');
+            helpDialog.classList.toggle('active');
+        }
+
+        // Event listeners for spacebar and 'R'
+        document.addEventListener('keydown', function (event) {
+            if (event.key === ' ') { // Spacebar to start/stop timer
+                toggleTimer();
+            } else if (event.key === 'r' || event.key === 'R') { // 'R' to reset timer
+                resetTimer();
+            }
+        });
+
+        // Fullscreen function
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
