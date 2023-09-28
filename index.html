@@ -390,6 +390,9 @@
             time = 30;
             updateTimerDisplay();
             isPaused = false;
+
+            const timerButton = document.getElementById("timerButton");
+            timerButton.textContent = "Start";
         }
 
         function applySettings() {
